@@ -37,7 +37,7 @@ influx.getDatabaseNames()
 
 
 // Eingangsvariable
-// var eingangsTemperatur = 14;
+var eingangsTemperatur;
 
 // Zeitkonstante bei 13°C
 var zeitkonstante13 = 60000;
@@ -50,8 +50,10 @@ var zeitkonstante28 = 30000;
 
 // Letzte Temperatur aus der Influx holen
 function getTemp() {
-    eingangsTemperatur = 16;
-    return;
+    influx.query(`SELECT last(temperatur) FROM tempSensor`).then(result => {
+        eingangsTemperatur = result[0].last;
+        return;
+    });
 }
 
 
