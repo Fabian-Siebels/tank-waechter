@@ -1,0 +1,103 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Device:R R1
+U 1 1 5F931CD0
+P 2200 1950
+F 0 "R1" H 2270 1996 50  0000 L CNN
+F 1 "4,7k" H 2270 1905 50  0000 L CNN
+F 2 "" V 2130 1950 50  0001 C CNN
+F 3 "~" H 2200 1950 50  0001 C CNN
+	1    2200 1950
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:-5V #PWR0101
+U 1 1 5F932B63
+P 2550 1350
+F 0 "#PWR0101" H 2550 1450 50  0001 C CNN
+F 1 "-5V" H 2565 1523 50  0000 C CNN
+F 2 "" H 2550 1350 50  0001 C CNN
+F 3 "" H 2550 1350 50  0001 C CNN
+	1    2550 1350
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 5F933548
+P 2700 1300
+F 0 "#PWR0102" H 2700 1050 50  0001 C CNN
+F 1 "GND" H 2705 1127 50  0000 C CNN
+F 2 "" H 2700 1300 50  0001 C CNN
+F 3 "" H 2700 1300 50  0001 C CNN
+	1    2700 1300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #Data0101
+U 1 1 5F933C58
+P 2900 1250
+F 0 "#Data0101" H 2988 1287 50  0000 L CNN
+F 1 "VCC" H 2915 1423 50  0001 C CIN
+F 2 "" H 2900 1250 50  0001 C CNN
+F 3 "" H 2900 1250 50  0001 C CNN
+	1    2900 1250
+	1    0    0    -1  
+$EndComp
+$Comp
+L MCU_Module:WeMos_D1_mini U1
+U 1 1 5F934887
+P 3350 2300
+F 0 "U1" H 3350 1411 50  0000 C CNN
+F 1 "WeMos_D1_mini" H 3350 1320 50  0000 C CNN
+F 2 "Module:WEMOS_D1_mini_light" H 3350 1150 50  0001 C CNN
+F 3 "https://wiki.wemos.cc/products:d1:d1_mini#documentation" H 1500 1150 50  0001 C CNN
+	1    3350 2300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2900 1250 4000 1250
+Wire Wire Line
+	4000 1250 4000 2100
+Wire Wire Line
+	4000 2100 3750 2100
+Wire Wire Line
+	2700 1300 2700 3500
+Wire Wire Line
+	2700 3500 3350 3500
+Wire Wire Line
+	3350 3500 3350 3100
+Wire Wire Line
+	2550 1350 2550 1600
+Wire Wire Line
+	2550 1600 2950 1600
+Wire Wire Line
+	2950 1600 2950 1500
+Wire Wire Line
+	2950 1500 3250 1500
+Wire Wire Line
+	2550 1600 2550 2250
+Wire Wire Line
+	2550 2250 2200 2250
+Wire Wire Line
+	2200 2250 2200 2100
+Connection ~ 2550 1600
+Wire Wire Line
+	2200 1800 2900 1800
+Wire Wire Line
+	2900 1800 2900 1250
+Connection ~ 2900 1250
+$EndSCHEMATC
