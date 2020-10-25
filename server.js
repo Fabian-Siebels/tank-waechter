@@ -5,6 +5,9 @@
 // Temperatur mehr als 300 Min über 28°C
 // Netzwerkstörung über 300 Min
 
+// Env laden
+require("dotenv").config();
+
 // Konstanten fuer die Influx Datenbank
 const serverhost = "172.16.0.253";
 const dbname = "tankwaechter";
@@ -34,13 +37,47 @@ influx.getDatabaseNames()
         }
     })
 
+// Telegram schnick schnack
+const TeleBot = require('telebot');
+var bot = new TeleBot({
+    token: process.env.TOKEN
+});
+
+bot.on([/^\/pin (.+)$/], (msg, props) => {
+    const text = props.match[1];
+    if (text == process.env.PIN) {
+        let erfolg = "Erfolgreich!";
+        return bot.sendMessage(msg.from.id, erfolg);
+    } else {
+        let fehler = "Fehler!";
+        return bot.sendMessage(msg.from.id, fehler);
+    }
+});
+
+bot.on(['/start'], (msg) => {
+    console.log(msg.from.id);
+    let nachricht = "🖐 Moin, gebe bitte deinen PIN per folgenden Befehl ein: /pin <deinepin> \n \n *Bitte auf Kleinschreibung achten!*";
+    return bot.sendMessage(msg.from.id, nachricht, {parseMode: 'Markdown'});
+});
+
+bot.on(['/stop'], (msg) => {
+    console.log(msg.from.id);
+    let nachricht = "🖐 Moin, du wurdest aus dem System entfernt!";
+    return bot.sendMessage(msg.from.id, nachricht, {parseMode: 'Markdown'});
+});
+
+function warning2telegram(uegrad, uezeit) {
+    let message = "*⚠️ Alarmmeldung:* \n *Die Milch ist seit " + uezeit + " Minuten über " + uegrad + " C°!*"
+    bot.sendMessage(process.env.CHATID, message, {parseMode: 'Markdown'});
+};
+
 
 
 // Eingangsvariable
 var eingangsTemperatur;
 
 // Zeitkonstante bei 13°C
-var zeitkonstante13 = 60000;
+var zeitkonstante13 = 15000;
 
 // Zeitkonstante bei 16°C
 var zeitkonstante16 = 36000;
@@ -81,6 +118,7 @@ function checkTemp() {
         }
         if (Date.now() >= zeitSpeicher.ueberT300) {
             console.log("Zeit voll über 28°C");
+            warning2telegram(28, 300);
             zeitSpeicher.benutzungT300 = 0;
         }
     } else if (eingangsTemperatur >= 16) {
@@ -93,6 +131,7 @@ function checkTemp() {
         }
         if (Date.now() >= zeitSpeicher.ueberT360) {
             console.log("Zeit Voll über 16°C!")
+            warning2telegram(16, 360);
             zeitSpeicher.benutzungT360 = 0;
         }
     } else if (eingangsTemperatur >= 13) {
@@ -105,11 +144,12 @@ function checkTemp() {
         }
         if (Date.now() >= zeitSpeicher.ueberT600) {
             console.log("Zeit Voll über 13°C")
+            warning2telegram(13, 600);
             zeitSpeicher.benutzungT600 = 0;
         }
     }
 }
 
 
-
+bot.start();
 setInterval(checkTemp, 1000);
