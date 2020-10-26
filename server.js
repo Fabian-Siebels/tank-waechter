@@ -9,7 +9,7 @@
 require("dotenv").config();
 
 // Konstanten fuer die Influx Datenbank
-const serverhost = "172.16.0.253";
+const serverhost = process.env.SERVERHOST;
 const dbname = "tankwaechter";
 const measurementname = "tempSensor";
 
@@ -36,6 +36,9 @@ influx.getDatabaseNames()
             return influx.createDatabase(dbname);
         }
     })
+    .catch(err => {
+        console.error(`Konnte keine Datenbank erstellen!`);
+    })
 
 // Telegram schnick schnack
 const TeleBot = require('telebot');
@@ -57,18 +60,24 @@ bot.on([/^\/pin (.+)$/], (msg, props) => {
 bot.on(['/start'], (msg) => {
     console.log(msg.from.id);
     let nachricht = "🖐 Moin, gebe bitte deinen PIN per folgenden Befehl ein: /pin <deinepin> \n \n *Bitte auf Kleinschreibung achten!*";
-    return bot.sendMessage(msg.from.id, nachricht, {parseMode: 'Markdown'});
+    return bot.sendMessage(msg.from.id, nachricht, {
+        parseMode: 'Markdown'
+    });
 });
 
 bot.on(['/stop'], (msg) => {
     console.log(msg.from.id);
     let nachricht = "🖐 Moin, du wurdest aus dem System entfernt!";
-    return bot.sendMessage(msg.from.id, nachricht, {parseMode: 'Markdown'});
+    return bot.sendMessage(msg.from.id, nachricht, {
+        parseMode: 'Markdown'
+    });
 });
 
 function warning2telegram(uegrad, uezeit) {
     let message = "*⚠️ Alarmmeldung:* \n *Die Milch ist seit " + uezeit + " Minuten über " + uegrad + " C°!*"
-    bot.sendMessage(process.env.CHATID, message, {parseMode: 'Markdown'});
+    bot.sendMessage(process.env.CHATID, message, {
+        parseMode: 'Markdown'
+    });
 };
 
 
@@ -88,9 +97,12 @@ var zeitkonstante28 = 30000;
 // Letzte Temperatur aus der Influx holen
 function getTemp() {
     influx.query(`SELECT last(temperatur) FROM tempSensor`).then(result => {
+        console.log(result[0].last);
         eingangsTemperatur = result[0].last;
         return;
-    });
+    }).catch(err => {
+        console.log('Keine Daten gefunden!');
+    })
 }
 
 
@@ -108,44 +120,48 @@ var zeitSpeicher = {
 // UeberprüfungsAlgorithmus
 function checkTemp() {
     getTemp()
-    if (eingangsTemperatur >= 28) {
-        console.log("Über 28C")
-        if (zeitSpeicher.ueberT300 >= 0 && zeitSpeicher.benutzungT300 == 0) {
-            zeitSpeicher.ueberT300 = Date.now() + zeitkonstante28;
-            zeitSpeicher.benutzungT600 = 0;
-            zeitSpeicher.benutzungT360 = 0;
-            zeitSpeicher.benutzungT300 = 1;
-        }
-        if (Date.now() >= zeitSpeicher.ueberT300) {
-            console.log("Zeit voll über 28°C");
-            warning2telegram(28, 300);
-            zeitSpeicher.benutzungT300 = 0;
-        }
-    } else if (eingangsTemperatur >= 16) {
-        console.log("Über 16°C")
-        if (zeitSpeicher.ueberT360 >= 0 && zeitSpeicher.benutzungT360 == 0) {
-            zeitSpeicher.ueberT360 = Date.now() + zeitkonstante16;
-            zeitSpeicher.benutzungT600 = 0;
-            zeitSpeicher.benutzungT360 = 1;
-            zeitSpeicher.benutzungT300 = 0;
-        }
-        if (Date.now() >= zeitSpeicher.ueberT360) {
-            console.log("Zeit Voll über 16°C!")
-            warning2telegram(16, 360);
-            zeitSpeicher.benutzungT360 = 0;
-        }
-    } else if (eingangsTemperatur >= 13) {
-        console.log("Über 13°C")
-        if (zeitSpeicher.ueberT600 >= 0 && zeitSpeicher.benutzungT600 == 0) {
-            zeitSpeicher.ueberT600 = Date.now() + zeitkonstante13;
-            zeitSpeicher.benutzungT600 = 1;
-            zeitSpeicher.benutzungT360 = 0;
-            zeitSpeicher.benutzungT300 = 0;
-        }
-        if (Date.now() >= zeitSpeicher.ueberT600) {
-            console.log("Zeit Voll über 13°C")
-            warning2telegram(13, 600);
-            zeitSpeicher.benutzungT600 = 0;
+    if (eingangsTemperatur == null) {
+        console.error("Fehler keine Daten in der Datenbank");
+    } else {
+        if (eingangsTemperatur >= 28) {
+            console.log("Über 28C")
+            if (zeitSpeicher.ueberT300 >= 0 && zeitSpeicher.benutzungT300 == 0) {
+                zeitSpeicher.ueberT300 = Date.now() + zeitkonstante28;
+                zeitSpeicher.benutzungT600 = 0;
+                zeitSpeicher.benutzungT360 = 0;
+                zeitSpeicher.benutzungT300 = 1;
+            }
+            if (Date.now() >= zeitSpeicher.ueberT300) {
+                console.log("Zeit voll über 28°C");
+                warning2telegram(28, 300);
+                zeitSpeicher.benutzungT300 = 0;
+            }
+        } else if (eingangsTemperatur >= 16) {
+            console.log("Über 16°C")
+            if (zeitSpeicher.ueberT360 >= 0 && zeitSpeicher.benutzungT360 == 0) {
+                zeitSpeicher.ueberT360 = Date.now() + zeitkonstante16;
+                zeitSpeicher.benutzungT600 = 0;
+                zeitSpeicher.benutzungT360 = 1;
+                zeitSpeicher.benutzungT300 = 0;
+            }
+            if (Date.now() >= zeitSpeicher.ueberT360) {
+                console.log("Zeit Voll über 16°C!")
+                warning2telegram(16, 360);
+                zeitSpeicher.benutzungT360 = 0;
+            }
+        } else if (eingangsTemperatur >= 13) {
+            console.log("Über 13°C")
+            if (zeitSpeicher.ueberT600 >= 0 && zeitSpeicher.benutzungT600 == 0) {
+                zeitSpeicher.ueberT600 = Date.now() + zeitkonstante13;
+                zeitSpeicher.benutzungT600 = 1;
+                zeitSpeicher.benutzungT360 = 0;
+                zeitSpeicher.benutzungT300 = 0;
+            }
+            if (Date.now() >= zeitSpeicher.ueberT600) {
+                console.log("Zeit Voll über 13°C")
+                warning2telegram(13, 600);
+                zeitSpeicher.benutzungT600 = 0;
+            }
         }
     }
 }
