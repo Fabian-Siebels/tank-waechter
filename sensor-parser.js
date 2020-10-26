@@ -16,7 +16,8 @@ const influx = new Influx.InfluxDB({
     schema: [{
         measurement: measurementname,
         fields: {
-            temperatur: Influx.FieldType.FLOAT
+            temperatur: Influx.FieldType.FLOAT,
+            id: Influx.FieldType.INTEGER 
         },
         tags: [
             measurementname
@@ -40,7 +41,8 @@ function write2db(eingangsTemp) {
     influx.writePoints([{
         measurement: measurementname,
         fields: {
-            temperatur: eingangsTemp
+            temperatur: eingangsTemp,
+            id: 12
         },
     }]).catch(err => {
         console.log(`Error beim Einfügen in die DB: ${err.stack}`);

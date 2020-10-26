@@ -5,6 +5,7 @@
 // Temperatur mehr als 300 Min über 28°C
 // Netzwerkstörung über 300 Min
 
+
 // Env laden
 require("dotenv").config();
 
@@ -46,6 +47,9 @@ var bot = new TeleBot({
     token: process.env.TOKEN
 });
 
+// Pin einstellung über Influx per Timestamp
+// DELETE FROM tempSensor WHERE time=result[0].time
+
 bot.on([/^\/pin (.+)$/], (msg, props) => {
     const text = props.match[1];
     if (text == process.env.PIN) {
@@ -60,7 +64,7 @@ bot.on([/^\/pin (.+)$/], (msg, props) => {
 bot.on(['/start'], (msg) => {
     console.log(msg.from.id);
     let nachricht = "🖐 Moin, gebe bitte deinen PIN per folgenden Befehl ein: /pin <deinepin> \n \n *Bitte auf Kleinschreibung achten!*";
-    return bot.sendMessage(msg.from.id, nachricht, {
+    return bot.sendMessage(msg.chat.id, nachricht, {
         parseMode: 'Markdown'
     });
 });
@@ -68,7 +72,7 @@ bot.on(['/start'], (msg) => {
 bot.on(['/stop'], (msg) => {
     console.log(msg.from.id);
     let nachricht = "🖐 Moin, du wurdest aus dem System entfernt!";
-    return bot.sendMessage(msg.from.id, nachricht, {
+    return bot.sendMessage(msg.chat.id, nachricht, {
         parseMode: 'Markdown'
     });
 });
@@ -164,4 +168,4 @@ function checkTemp() {
 
 
 bot.start();
-setInterval(checkTemp, 1000);
+// setInterval(checkTemp, 1000);
