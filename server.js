@@ -97,7 +97,6 @@ var zeitkonstante28 = 30000;
 // Letzte Temperatur aus der Influx holen
 function getTemp() {
     influx.query(`SELECT last(temperatur) FROM tempSensor`).then(result => {
-        console.log(result[0].last);
         eingangsTemperatur = result[0].last;
         return;
     }).catch(err => {
@@ -120,51 +119,48 @@ var zeitSpeicher = {
 // UeberprüfungsAlgorithmus
 function checkTemp() {
     getTemp()
-    if (eingangsTemperatur == null) {
-        console.error("Fehler keine Daten in der Datenbank");
-    } else {
-        if (eingangsTemperatur >= 28) {
-            console.log("Über 28C")
-            if (zeitSpeicher.ueberT300 >= 0 && zeitSpeicher.benutzungT300 == 0) {
-                zeitSpeicher.ueberT300 = Date.now() + zeitkonstante28;
-                zeitSpeicher.benutzungT600 = 0;
-                zeitSpeicher.benutzungT360 = 0;
-                zeitSpeicher.benutzungT300 = 1;
-            }
-            if (Date.now() >= zeitSpeicher.ueberT300) {
-                console.log("Zeit voll über 28°C");
-                warning2telegram(28, 300);
-                zeitSpeicher.benutzungT300 = 0;
-            }
-        } else if (eingangsTemperatur >= 16) {
-            console.log("Über 16°C")
-            if (zeitSpeicher.ueberT360 >= 0 && zeitSpeicher.benutzungT360 == 0) {
-                zeitSpeicher.ueberT360 = Date.now() + zeitkonstante16;
-                zeitSpeicher.benutzungT600 = 0;
-                zeitSpeicher.benutzungT360 = 1;
-                zeitSpeicher.benutzungT300 = 0;
-            }
-            if (Date.now() >= zeitSpeicher.ueberT360) {
-                console.log("Zeit Voll über 16°C!")
-                warning2telegram(16, 360);
-                zeitSpeicher.benutzungT360 = 0;
-            }
-        } else if (eingangsTemperatur >= 13) {
-            console.log("Über 13°C")
-            if (zeitSpeicher.ueberT600 >= 0 && zeitSpeicher.benutzungT600 == 0) {
-                zeitSpeicher.ueberT600 = Date.now() + zeitkonstante13;
-                zeitSpeicher.benutzungT600 = 1;
-                zeitSpeicher.benutzungT360 = 0;
-                zeitSpeicher.benutzungT300 = 0;
-            }
-            if (Date.now() >= zeitSpeicher.ueberT600) {
-                console.log("Zeit Voll über 13°C")
-                warning2telegram(13, 600);
-                zeitSpeicher.benutzungT600 = 0;
-            }
+    if (eingangsTemperatur >= 28) {
+        console.log("Über 28C")
+        if (zeitSpeicher.ueberT300 >= 0 && zeitSpeicher.benutzungT300 == 0) {
+            zeitSpeicher.ueberT300 = Date.now() + zeitkonstante28;
+            zeitSpeicher.benutzungT600 = 0;
+            zeitSpeicher.benutzungT360 = 0;
+            zeitSpeicher.benutzungT300 = 1;
+        }
+        if (Date.now() >= zeitSpeicher.ueberT300) {
+            console.log("Zeit voll über 28°C");
+            warning2telegram(28, 300);
+            zeitSpeicher.benutzungT300 = 0;
+        }
+    } else if (eingangsTemperatur >= 16) {
+        console.log("Über 16°C")
+        if (zeitSpeicher.ueberT360 >= 0 && zeitSpeicher.benutzungT360 == 0) {
+            zeitSpeicher.ueberT360 = Date.now() + zeitkonstante16;
+            zeitSpeicher.benutzungT600 = 0;
+            zeitSpeicher.benutzungT360 = 1;
+            zeitSpeicher.benutzungT300 = 0;
+        }
+        if (Date.now() >= zeitSpeicher.ueberT360) {
+            console.log("Zeit Voll über 16°C!")
+            warning2telegram(16, 360);
+            zeitSpeicher.benutzungT360 = 0;
+        }
+    } else if (eingangsTemperatur >= 13) {
+        console.log("Über 13°C")
+        if (zeitSpeicher.ueberT600 >= 0 && zeitSpeicher.benutzungT600 == 0) {
+            zeitSpeicher.ueberT600 = Date.now() + zeitkonstante13;
+            zeitSpeicher.benutzungT600 = 1;
+            zeitSpeicher.benutzungT360 = 0;
+            zeitSpeicher.benutzungT300 = 0;
+        }
+        if (Date.now() >= zeitSpeicher.ueberT600) {
+            console.log("Zeit Voll über 13°C")
+            warning2telegram(13, 600);
+            zeitSpeicher.benutzungT600 = 0;
         }
     }
 }
+
 
 
 bot.start();
