@@ -79,7 +79,7 @@ bot.on(['/stop'], (msg) => {
 
 function warning2telegram(uegrad, uezeit) {
     let message = "*⚠️ Alarmmeldung:* \n *Die Milch ist seit " + uezeit + " Minuten über " + uegrad + " C°!*"
-    bot.sendMessage(process.env.CHATID, message, {
+    bot.sendMessage(msg.chat.id, message, {
         parseMode: 'Markdown'
     });
 };
