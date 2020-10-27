@@ -13,6 +13,7 @@ require("dotenv").config();
 const serverhost = process.env.SERVERHOST;
 const dbname = "tankwaechter";
 const measurementname = "tempSensor";
+const pindb = "pindb";
 
 const Influx = require("influx");
 
@@ -47,8 +48,40 @@ var bot = new TeleBot({
     token: process.env.TOKEN
 });
 
-// Pin einstellung über Influx per Timestamp
-// DELETE FROM tempSensor WHERE time=result[0].time
+var fs = require('fs');
+
+function lese() {
+    fs.readFile('user.txt', 'utf8', function(err, data) {
+        // console.log(data);
+        if (!data) {
+            console.log("Keine Daten in der Datei!")
+        } else {
+            let zwischenspeicher = "[" + data + "]";
+            let userobjekt = JSON.parse(zwischenspeicher);
+            for (let i = 0; i < userobjekt.length; i++) {
+                    console.log("I=" + i + "ID=" + userobjekt[i].telegramid);
+                }
+        }
+    })
+}
+
+function schreibeUser(telegramuser, telegramid) {
+    fs.readFile('user.txt', 'utf8', function(err, data) {
+        if (!data) {
+            fs.writeFile('user.txt', `{"telegramname":"${telegramuser}", "telegramid":"${telegramid}"}`, function (err, file) {
+                if (err) throw err;
+                console.log("Hinzugefügt")
+            });
+        } else {
+            fs.writeFile('user.txt', `${data}, {"telegramname":"${telegramuser}", "telegramid":"${telegramid}"}`, function (err, file) {
+                if (err) throw err;
+                console.log("Eingefügt")
+            });
+        }
+    })
+}
+
+
 
 bot.on([/^\/pin (.+)$/], (msg, props) => {
     const text = props.match[1];
@@ -100,14 +133,20 @@ var zeitkonstante28 = 30000;
 
 // Letzte Temperatur aus der Influx holen
 function getTemp() {
-    influx.query(`SELECT last(temperatur) FROM tempSensor`).then(result => {
-        eingangsTemperatur = result[0].last;
+    // influx.query(`SELECT last(temperatur) FROM tempSensor`).then(result => {
+    //     eingangsTemperatur = result[0].last;
+    //     return;
+    // }).catch(err => {
+    //     console.log('Keine Daten gefunden!');
+    // })
+    influx.query(`SELECT * FROM tempSensor WHERE "id" = 12`).then(result => {
+        // eingangsTemperatur = result[0].last;
+        console.log(result);
         return;
     }).catch(err => {
         console.log('Keine Daten gefunden!');
     })
 }
-
 
 // Willi und der Zeitgeist
 var zeitSpeicher = {
