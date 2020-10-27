@@ -50,8 +50,10 @@ var bot = new TeleBot({
 
 var fs = require('fs');
 
+// TODO Gruppe macht Probleme bei der ID
+
 function lese() {
-    fs.readFile('user.txt', 'utf8', function(err, data) {
+    fs.readFile('user.txt', 'utf8', function (err, data) {
         // console.log(data);
         if (!data) {
             console.log("Keine Daten in der Datei!")
@@ -59,35 +61,68 @@ function lese() {
             let zwischenspeicher = "[" + data + "]";
             let userobjekt = JSON.parse(zwischenspeicher);
             for (let i = 0; i < userobjekt.length; i++) {
-                    console.log("I=" + i + "ID=" + userobjekt[i].telegramid);
-                }
+                console.log("I=" + i + "ID=" + userobjekt[i].telegramid);
+            }
         }
     })
 }
 
 function schreibeUser(telegramuser, telegramid) {
-    fs.readFile('user.txt', 'utf8', function(err, data) {
+    fs.readFile('user.txt', 'utf8', function (err, data) {
         if (!data) {
             fs.writeFile('user.txt', `{"telegramname":"${telegramuser}", "telegramid":"${telegramid}"}`, function (err, file) {
                 if (err) throw err;
-                console.log("Hinzugefügt")
+                botsendmsg("Jetzt erhälst du NAchrichten von deinem Tankwächter!", telegramid)
             });
         } else {
-            fs.writeFile('user.txt', `${data}, {"telegramname":"${telegramuser}", "telegramid":"${telegramid}"}`, function (err, file) {
-                if (err) throw err;
-                console.log("Eingefügt")
-            });
+            let zwischenspeicher = "[" + data + "]";
+            let userobjekt = JSON.parse(zwischenspeicher);
+            for (let i = 0; i < userobjekt.length; i++) {
+                if (userobjekt[i].telegramid == telegramid) {
+                    botsendmsg("Du bist bereits angemeldet!", telegramid);
+                } else {
+                    fs.writeFile('user.txt', `${data}, {"telegramname":"${telegramuser}", "telegramid":"${telegramid}"}`, function (err, file) {
+                        if (err) throw err;
+                        botsendmsg("Ab jetzt erhälst du Nachrichten von deinem Tankwächter!", telegramid)
+                    });
+                }
+            }
         }
     })
 }
 
+function deleteUser(telegramid) {
+    fs.readFile('user.txt', 'utf8', function (err, data) {
+        if (!data) {
+            console.log("Keine Daten in der Datei!")
+        } else {
+            let zwischenspeicher = "[" + data + "]";
+            let userobjekt = JSON.parse(zwischenspeicher);
+            for (let i = userobjekt.length - 1; i >= 0; --i) {
+                if (userobjekt[i].telegramid == telegramid) {
+                    userobjekt.splice(i, 1);
+                }
+            }
+            fs.writeFile('user.txt', JSON.stringify(userobjekt).split('[').join('').split(']').join(''), function (err, file) {
+                if (err) throw err;
+                console.log(`ERROR:`);
+            })
+        }
+    })
+}
 
+function botsendmsg(message, id) {
+    bot.sendMessage(id, message, {
+        parseMode: 'Markdown'
+    });
+}
 
 bot.on([/^\/pin (.+)$/], (msg, props) => {
     const text = props.match[1];
     if (text == process.env.PIN) {
         let erfolg = "Erfolgreich!";
-        return bot.sendMessage(msg.from.id, erfolg);
+        schreibeUser(msg.from.username, msg.chat.id)
+        // return bot.sendMessage(msg.from.id, erfolg);
     } else {
         let fehler = "Fehler!";
         return bot.sendMessage(msg.from.id, fehler);
@@ -103,7 +138,7 @@ bot.on(['/start'], (msg) => {
 });
 
 bot.on(['/stop'], (msg) => {
-    console.log(msg.from.id);
+    deleteUser(msg.chat.id)
     let nachricht = "🖐 Moin, du wurdest aus dem System entfernt!";
     return bot.sendMessage(msg.chat.id, nachricht, {
         parseMode: 'Markdown'

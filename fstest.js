@@ -2,7 +2,6 @@ var fs = require('fs');
 
 var name = "TEST4";
 var id = "10"
-var delindex;
 
 
 function lese() {
