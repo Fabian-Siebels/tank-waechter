@@ -124,7 +124,6 @@ bot.on([/^\/pin (.+)$/], (msg, props) => {
     if (text == process.env.PIN) {
         let erfolg = "Erfolgreich!";
         schreibeUser(msg.from.username, msg.chat.id)
-        // return bot.sendMessage(msg.from.id, erfolg);
     } else {
         let fehler = "⚠️ Dein Pin ist Falsch!";
         return bot.sendMessage(msg.chat.id, fehler);
@@ -146,13 +145,6 @@ bot.on(['/stop'], (msg) => {
         parseMode: 'Markdown'
     });
 });
-
-function warning2telegram1(uegrad, uezeit) {
-    let message = "*⚠️ Alarmmeldung:* \n *Die Milch ist seit " + uezeit + " Minuten über " + uegrad + " C°!*"
-    bot.sendMessage(msg.chat.id, message, {
-        parseMode: 'Markdown'
-    });
-};
 
 function warning2telegram(uegrad, uezeit) {
     let msg = "*⚠️ Alarmmeldung:* \n *Die Milch ist seit " + uezeit + " Minuten über " + uegrad + " C°!*";
