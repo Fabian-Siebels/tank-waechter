@@ -69,22 +69,26 @@ function lese() {
 
 function schreibeUser(telegramuser, telegramid) {
     fs.readFile('user.txt', 'utf8', function (err, data) {
-        if (!data) {
-            fs.writeFile('user.txt', `{"telegramname":"${telegramuser}", "telegramid":"${telegramid}"}`, function (err, file) {
-                if (err) throw err;
-                botsendmsg("Jetzt erhälst du NAchrichten von deinem Tankwächter!", telegramid)
-            });
+        let zwischenspeicher = "[" + data + "]";
+        let userobjekt = JSON.parse(zwischenspeicher);
+        if (telegramid.toString().includes("-")) {
+            botsendmsg("⚠️ *Diese Software ist nicht für Gruppen geeignet!*", telegramid)
         } else {
-            let zwischenspeicher = "[" + data + "]";
-            let userobjekt = JSON.parse(zwischenspeicher);
-            for (let i = 0; i < userobjekt.length; i++) {
-                if (userobjekt[i].telegramid == telegramid) {
-                    botsendmsg("Du bist bereits angemeldet!", telegramid);
-                } else {
-                    fs.writeFile('user.txt', `${data}, {"telegramname":"${telegramuser}", "telegramid":"${telegramid}"}`, function (err, file) {
-                        if (err) throw err;
-                        botsendmsg("Ab jetzt erhälst du Nachrichten von deinem Tankwächter!", telegramid)
-                    });
+            if (!data) {
+                fs.writeFile('user.txt', `{"telegramname":"${telegramuser}", "telegramid":"${telegramid}"}`, function (err, file) {
+                    if (err) throw err;
+                    botsendmsg("Jetzt erhälst du Nachrichten von deinem Tankwächter!", telegramid)
+                });
+            } else {
+                for (let i = 0; i < userobjekt.length; i++) {
+                    if (userobjekt[i].telegramid == telegramid) {
+                        botsendmsg("Du bist bereits angemeldet!", telegramid);
+                    } else {
+                        fs.writeFile('user.txt', `${data}, {"telegramname":"${telegramuser}", "telegramid":"${telegramid}"}`, function (err, file) {
+                            if (err) throw err;
+                            botsendmsg("Ab jetzt erhälst du Nachrichten von deinem Tankwächter!", telegramid)
+                        });
+                    }
                 }
             }
         }
@@ -124,8 +128,8 @@ bot.on([/^\/pin (.+)$/], (msg, props) => {
         schreibeUser(msg.from.username, msg.chat.id)
         // return bot.sendMessage(msg.from.id, erfolg);
     } else {
-        let fehler = "Fehler!";
-        return bot.sendMessage(msg.from.id, fehler);
+        let fehler = "⚠️ Dein Pin ist Falsch!";
+        return bot.sendMessage(msg.chat.id, fehler);
     }
 });
 
