@@ -80,4 +80,4 @@ function readSensor(sensorID) {
     })
 }
 
-getid();
+setInterval(getid, 15000);

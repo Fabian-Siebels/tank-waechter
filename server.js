@@ -9,6 +9,9 @@
 // Env laden
 require("dotenv").config();
 
+// Datumskonstanten
+const optionen = { year: 'numeric', month: 'numeric', day: 'numeric' }
+
 // Konstanten fuer die Influx Datenbank
 const serverhost = process.env.SERVERHOST;
 const dbname = "tankwaechter";
@@ -41,6 +44,16 @@ influx.getDatabaseNames()
     .catch(err => {
         console.error(`Konnte keine Datenbank erstellen!`);
     })
+
+// Letzte Temperatur aus der Influx holen
+function getTemp() {
+    influx.query(`SELECT last(temperatur) FROM tempSensor`).then(result => {
+        eingangsTemperatur = result[0].last;
+        // return eingangsTemperatur;
+    }).catch(err => {
+        console.log('Keine Daten gefunden!');
+    })
+}
 
 // Telegram schnick schnack
 const TeleBot = require('telebot');
@@ -119,6 +132,20 @@ function botsendmsg(message, id) {
     });
 }
 
+bot.on(['/temp'], (msg) => {
+    influx.query(`SELECT last(temperatur) FROM tempSensor`).then(result => {
+        let parsedTime = new Date(result[0].time._nanoISO);
+        let zeit = parsedTime.toLocaleTimeString('de-DE');
+        let datum = parsedTime.getDate() + "." + (parsedTime.getMonth() + 1) + "." + parsedTime.getFullYear();
+        let tempmsg = "Aktuelle Temperatur: " + result[0].last + " °C \nGemessen am: " + datum + " um " + zeit + " Uhr";
+        return bot.sendMessage(msg.chat.id, tempmsg, {
+            parseMode: 'Markdown'
+        });
+    }).catch(err => {
+        console.log('Keine Daten gefunden!');
+    })
+})
+
 bot.on([/^\/pin (.+)$/], (msg, props) => {
     const text = props.match[1];
     if (text == process.env.PIN) {
@@ -177,15 +204,6 @@ var zeitkonstante16 = 36000;
 // Zeitkonstante bei 28°C
 var zeitkonstante28 = 30000;
 
-// Letzte Temperatur aus der Influx holen
-function getTemp() {
-    influx.query(`SELECT last(temperatur) FROM tempSensor`).then(result => {
-        eingangsTemperatur = result[0].last;
-        return;
-    }).catch(err => {
-        console.log('Keine Daten gefunden!');
-    })
-}
 
 // Willi und der Zeitgeist
 var zeitSpeicher = {
