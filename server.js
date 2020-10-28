@@ -190,6 +190,22 @@ function warning2telegram(uegrad, uezeit) {
     })
 }
 
+bot.on(['/tag'], (msg) => {
+    influx.query(`SELECT MAX(temperatur) FROM tempSensor WHERE time > now() - 1h;SELECT MIN(temperatur) FROM tempSensor WHERE time > now() - 1h`).then(ergebnis => {
+        let parsedTimeMax = new Date(ergebnis[0][0].time._nanoISO);
+        let zeitMax = parsedTimeMax.toLocaleTimeString('de-DE');
+        let datumMax = parsedTimeMax.getDate() + "." + (parsedTimeMax.getMonth() + 1) + "." + parsedTimeMax.getFullYear();
+        let parsedTimeMin = new Date(ergebnis[1][0].time._nanoISO);
+        let zeitMin = parsedTimeMin.toLocaleTimeString('de-DE');
+        let datumMin = parsedTimeMin.getDate() + "." + (parsedTimeMin.getMonth() + 1) + "." + parsedTimeMin.getFullYear();
+        let tempmsg = "Min/Max Temperaturen der letzten 24h\n\nMinimale Temperatur: " + ergebnis[1][0].min + " °C \n" + datumMin + " um " + zeitMin + " Uhr\n\nMaximale Temperatur: " + ergebnis[0][0].max + " °C \n" + datumMax + " um " + zeitMax + " Uhr";
+        return bot.sendMessage(msg.chat.id, tempmsg, {
+            parseMode: 'Markdown'
+        });
+    }).catch(err => {
+        console.log(err);
+    })
+})
 
 
 // Eingangsvariable GLOBAL
