@@ -7,7 +7,7 @@ var fs = require('fs');
 const Influx = require('influx');
 
 // Variablen für die Datenbank
-const serverhost = process.env.SERVERHOST;
+const serverhost = "172.16.0.253";
 const dbname = "tankwaechter";
 const measurementname = "tempSensor";
 
