@@ -248,7 +248,9 @@ bot.on(['/display'], (msg) => {
         let datum = parsedTime.getDate() + "." + (parsedTime.getMonth() + 1) + "." + parsedTime.getFullYear();
         let tempmsg = "Aktuelle Temperatur: " + result[0].last + " °C \nGemessen am: " + datum + " um " + zeit + " Uhr";
         lcd.clearSync();
-        lcd.printSync(`Akt. Temp: ${result[0].last} °C`)
+        lcd.printSync(`Temp: ${result[0].last} °C`);
+        lcd.setCursorSync(0,1 );
+        lcd.printSync(`Time: ${zeit}`);
         return bot.sendMessage(msg.chat.id, tempmsg, {
             parseMode: 'Markdown'
         });
