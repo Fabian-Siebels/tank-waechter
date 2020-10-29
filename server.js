@@ -251,8 +251,7 @@ bot.on(['/display'], (msg) => {
         lcd.clearSync();
         lcd.printSync(`Temp: ${result[0].last} Grad`);
         lcd.setCursorSync(0,1 );
-        // lcd.printSync(`Time: ${zeit}`);
-        lcd.createChar(0, [0x0, 0x0, 0xa, 0x1f, 0x1f, 0xe, 0x4, 0x0]);
+        lcd.printSync(`Time: ${zeit}`);
         return bot.sendMessage(msg.chat.id, tempmsg, {
             parseMode: 'Markdown'
         });
@@ -261,6 +260,21 @@ bot.on(['/display'], (msg) => {
     })
 })
 
+function displayTemp() {
+    influx.query(`SELECT last(temperatur) FROM tempSensor`).then(result => {
+        let parsedTime = new Date(result[0].time._nanoISO);
+        let zeit = parsedTime.toLocaleTimeString('de-DE');
+        let datum = parsedTime.getDate() + "." + (parsedTime.getMonth() + 1) + "." + parsedTime.getFullYear();
+        lcd.clearSync();
+        lcd.printSync(`Temp: ${result[0].last} Grad`);
+        lcd.setCursorSync(0,1 );
+        lcd.printSync(`Time: ${zeit}`);
+    }).catch(err => {
+        console.log('Keine Daten gefunden!');
+    })
+}
+
+setInterval(displayTemp, 30000)
 // Eingangsvariable GLOBAL
 var eingangsTemperatur;
 
