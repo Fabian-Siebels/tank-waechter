@@ -8,6 +8,6 @@ try {
   }
 
 lcd.clearSync();
-lcd.printSync( 'Hello' );
+lcd.printSync( '    Siebels    ' );
 lcd.setCursorSync(0, 1);
-lcd.printSync( 'World' );
+lcd.printSync( '  Tankwaechter  ' );

@@ -55,6 +55,21 @@ function getTemp() {
     })
 }
 
+// LCD Display Int
+const LCD = require('raspberrypi-liquid-crystal');
+const lcd = new LCD( 1, 0x27, 16, 2 );
+
+try {
+    lcd.beginSync();
+  } catch (e) {
+    console.log(e);
+  }
+
+  lcd.clearSync();
+  lcd.printSync( '    Siebels    ' );
+  lcd.setCursorSync(0, 1);
+  lcd.printSync( '  Tankwaechter  ' );
+
 // Telegram schnick schnack
 const TeleBot = require('telebot');
 var bot = new TeleBot({
@@ -225,6 +240,22 @@ bot.on([/^\/tage (.+)$/], (msg, props) => {
     })
 })
 
+// Display Test
+bot.on(['/display'], (msg) => {
+    influx.query(`SELECT last(temperatur) FROM tempSensor`).then(result => {
+        let parsedTime = new Date(result[0].time._nanoISO);
+        let zeit = parsedTime.toLocaleTimeString('de-DE');
+        let datum = parsedTime.getDate() + "." + (parsedTime.getMonth() + 1) + "." + parsedTime.getFullYear();
+        let tempmsg = "Aktuelle Temperatur: " + result[0].last + " °C \nGemessen am: " + datum + " um " + zeit + " Uhr";
+        lcd.clearSync();
+        lcd.printSync(`Akt. Temp: ${result[0].last} °C`)
+        return bot.sendMessage(msg.chat.id, tempmsg, {
+            parseMode: 'Markdown'
+        });
+    }).catch(err => {
+        console.log('Keine Daten gefunden!');
+    })
+})
 
 // Eingangsvariable GLOBAL
 var eingangsTemperatur;
