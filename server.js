@@ -59,6 +59,7 @@ function getTemp() {
 const LCD = require('raspberrypi-liquid-crystal');
 const lcd = new LCD( 1, 0x27, 16, 2 );
 
+
 try {
     lcd.beginSync();
   } catch (e) {
@@ -248,9 +249,10 @@ bot.on(['/display'], (msg) => {
         let datum = parsedTime.getDate() + "." + (parsedTime.getMonth() + 1) + "." + parsedTime.getFullYear();
         let tempmsg = "Aktuelle Temperatur: " + result[0].last + " °C \nGemessen am: " + datum + " um " + zeit + " Uhr";
         lcd.clearSync();
-        lcd.printSync(`Temp: ${result[0].last} °C`);
+        lcd.printSync(`Temp: ${result[0].last} Grad`);
         lcd.setCursorSync(0,1 );
-        lcd.printSync(`Time: ${zeit}`);
+        // lcd.printSync(`Time: ${zeit}`);
+        lcd.createChar(0, [0x0, 0x0, 0xa, 0x1f, 0x1f, 0xe, 0x4, 0x0]);
         return bot.sendMessage(msg.chat.id, tempmsg, {
             parseMode: 'Markdown'
         });
