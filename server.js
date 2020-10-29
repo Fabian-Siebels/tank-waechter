@@ -216,7 +216,7 @@ bot.on([/^\/tage (.+)$/], (msg, props) => {
         let parsedTimeMin = new Date(ergebnis[1][0].time._nanoISO);
         let zeitMin = parsedTimeMin.toLocaleTimeString('de-DE');
         let datumMin = parsedTimeMin.getDate() + "." + (parsedTimeMin.getMonth() + 1) + "." + parsedTimeMin.getFullYear();
-        let tempmsg = `Min/Max Temperaturen der letzten ${tage} Tage\n\nMinimale Temperatur: " + ergebnis[1][0].min + " °C \n" + datumMin + " um " + zeitMin + " Uhr\n\nMaximale Temperatur: " + ergebnis[0][0].max + " °C \n" + datumMax + " um " + zeitMax + " Uhr`;
+        let tempmsg = "Min/Max Temperaturen der letzten " + tage + " Tage\n\nMinimale Temperatur: " + ergebnis[1][0].min + " °C \n" + datumMin + " um " + zeitMin + " Uhr\n\nMaximale Temperatur: " + ergebnis[0][0].max + " °C \n" + datumMax + " um " + zeitMax + " Uhr";
         return bot.sendMessage(msg.chat.id, tempmsg, {
             parseMode: 'Markdown'
         });
