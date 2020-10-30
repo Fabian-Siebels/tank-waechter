@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <title>Tankwächter</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/tankwaechter.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="text-center"><b>Tankwächter</b></h1>
+        <div class="row">
+            <div class="col">
+                <div class="kachelBlau">
+                    <h2 class="text-center">Aktuelle Temperatur</h2>
+                    <h1 id="akttemp" class="text-center"><b>17,2 °C</b></h1>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="diagram">
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="assets/js/tankwaechter.js"></script>
+</body>
+
+</html>
