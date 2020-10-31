@@ -3,6 +3,13 @@
 require('dotenv')
 var fs = require('fs');
 
+// CRONTAB
+var CronJob = require('cron').CronJob;
+var job = new CronJob('*/10 * * * *', function() {
+    getid()
+}, null, true, 'Europe/Berlin');
+job.start();
+
 // Import InfluxDB
 const Influx = require('influx');
 
@@ -79,5 +86,3 @@ function readSensor(sensorID) {
         parseDec(data);
     })
 }
-
-setInterval(getid, 15000);
