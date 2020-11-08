@@ -1,14 +1,3 @@
-// var ctx = document.getElementById("myChart").getContext("2d");
-// var myChart = new Chart(ctx, {
-//     type: 'line',
-//     data: {
-//         labels: ["Zeit 1", "Zeit 2", "Zeit 3"],
-//         datasets: [{
-//             label: 'Time',
-//             data: [12, 19, 3]
-//         }]
-//     }
-// });
 Chart.defaults.global.animation = false;
 function BuildChart(labels, values, chartTitle) {
     var data = {
@@ -71,7 +60,7 @@ function updateChart() {
         }
     }
 
-    xhttp.open("GET", "http://localhost:3000/api/v1", false);
+    xhttp.open("GET", "http://172.16.2.68:3000/api/v1", false);
     xhttp.send();
 }
 
@@ -81,12 +70,15 @@ function updateTemp() {
         if (this.readyState == 4 && this.status == 200) {
             var json = JSON.parse(this.response);
             document.getElementById('akttemp').innerHTML = "" + json[0].temperatur + "°C";
+            let atime = new Date(json[0].time);
+            let ptime = atime.toLocaleTimeString('de-DE');
+            document.getElementById('akttime').innerHTML = "Messung um " + ptime + " Uhr" 
 
             BuildChart(labels, values, "Tankwächter")
         }
     }
 
-    xhttp.open("GET", "http://localhost:3000/api/v1/temp", false);
+    xhttp.open("GET", "http://172.16.2.68:3000/api/v1/temp", false);
     xhttp.send();
 }
 
@@ -94,4 +86,4 @@ updateTemp();
 updateChart();
 
 setInterval(updateTemp, 30000)
-setInterval(updateChart, 3000)
+setInterval(updateChart, 30000)
