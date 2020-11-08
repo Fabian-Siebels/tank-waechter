@@ -347,4 +347,4 @@ function checkTemp() {
 
 
 bot.start();
-// setInterval(checkTemp, 1000);
+setInterval(checkTemp, 30000);
