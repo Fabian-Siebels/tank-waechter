@@ -5,17 +5,8 @@ function BuildChart(labels, values, chartTitle) {
         datasets: [{
             label: chartTitle, // Name the series
             data: values,
-            backgroundColor: ['rgb(54, 162, 235)',
-                'rgb(54, 162, 235)',
-                'rgb(54, 162, 235)',
-                'rgb(54, 162, 235)',
-                'rgb(54, 162, 235)',
-                'rgb(54, 162, 235)',
-                'rgb(54, 162, 235)',
-                'rgb(54, 162, 235)',
-                'rgb(54, 162, 235)',
-                'rgb(54, 162, 235)',
-            ],
+            backgroundColor: ['#d62828'],
+            fill: true,
         }],
     };
     var ctx = document.getElementById("myChart").getContext('2d');
