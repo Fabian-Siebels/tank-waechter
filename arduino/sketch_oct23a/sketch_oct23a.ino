@@ -1,31 +1,94 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-
-// Data wire is plugged into pin 2 on the Arduino
 #define ONE_WIRE_BUS 2
 
-// Setup a OneWire instance to communicate with any OneWire devices
 OneWire oneWire(ONE_WIRE_BUS);
-
-// Pass OneWire reference to Dallas Temperature
 DallasTemperature sensors(&oneWire);
 
-void setup(void)
-{
-    Serial.begin(9600);
-    sensors.begin(); // Start up the library
+HTTPClient sender;
+
+// WLAN-Daten
+const char* ssid = "Fritz";
+const char* password = "77027122846784678608";
+
+//Messintervall in Sekunden
+int wait = 10 * 60;
+
+//Temperatur
+float temperature;
+
+
+void push(){
+
+  //Hier wird der Wert an die Smarthome-Umgebung übertragen
+  
+  if (sender.begin("http://172.16.0.253:43000/api/aussenTemp/setTemp/" + String(temperature))){
+
+    // HTTP-Code der Response speichern
+    int httpCode = sender.GET();
+   
+
+    if (httpCode > 0) {
+      
+      // Anfrage wurde gesendet und Server hat geantwortet
+      // Info: Der HTTP-Code für 'OK' ist 200
+      if (httpCode == HTTP_CODE_OK) {
+
+        // Hier wurden die Daten vom Server empfangen
+
+        // String vom Webseiteninhalt speichern
+        String payload = sender.getString();
+
+        // Hier kann mit dem Wert weitergearbeitet werden
+         // ist aber nicht unbedingt notwendig
+        Serial.println(payload);
+        
+        
+        
+      }
+      
+    }else{
+      // Falls HTTP-Error
+      Serial.printf("HTTP-Error: ", sender.errorToString(httpCode).c_str());
+    }
+
+    // Wenn alles abgeschlossen ist, wird die Verbindung wieder beendet
+    sender.end();
+    
+  }else {
+    Serial.printf("HTTP-Verbindung konnte nicht hergestellt werden!");
+  }
+
 }
 
-void loop(void)
-{
-    // call sensors.requestTemperatures() to issue a global temperature
-    // request to all devices on the bus
-    // Send the command to get temperature readings
-    sensors.requestTemperatures();
 
-    Serial.println("Temperature is: " + String(sensors.getTempCByIndex(0)) + "°C");
+void setup() {
+  Serial.begin(115200);
+  
+  WiFi.begin(ssid, password);
 
-    // You can have more than one DS18B20 on the same bus.
-    // 0 refers to the first IC on the wire
-    delay(1000);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(200);
+    Serial.print(".");
+  }
+
+  Serial.println("Verbunden!");
+  wait = wait * 1000;
+  sensors.begin();
+  
+}
+
+
+void loop() {
+  
+  sensors.requestTemperatures();
+  Serial.print(sensors.getTempCByIndex(0));
+  Serial.println(" °C");
+  
+  temperature = sensors.getTempCByIndex(0);
+  push();
+  delay(wait);
+
 }
