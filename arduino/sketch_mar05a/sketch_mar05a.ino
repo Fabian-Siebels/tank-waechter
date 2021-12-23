@@ -5,6 +5,8 @@
 // Der PIN D2 (GPIO 4) wird als BUS-Pin verwendet
 #define ONE_WIRE_BUS 4
 
+int incomingByte = 0; // Für eingehende serielle Daten
+
 LiquidCrystal_I2C lcd(0x27,16,2);
 
 OneWire oneWire(ONE_WIRE_BUS);
@@ -26,15 +28,16 @@ unsigned long zeitSpeicher[] = {0,0,0,0,0,0,0,0,0};
 unsigned long timer = 0;
 unsigned long warteButton = 0;
 int fehlerAnzeige = 0;
-int quitButtonState = 0;
-int buttonZaehler = 0;
+
+int quittButtonZaehler = 0;
+int reiniugungsButtonZaehler = 0;
+int motorButtonZaehler = 0;
 
 void setup(){
   Serial.begin(115200);
 
   // QuitButton
   pinMode(A0, INPUT);
-  
   // DS18B20 initialisieren
   DS18B20.begin();
   // LCD-Display initialisieren
@@ -45,6 +48,8 @@ void setup(){
   lcd.setCursor(0,1);
   lcd.print("  Tankwaechter");
 }
+
+
 
 void leseTemp() {
   DS18B20.requestTemperatures();
@@ -112,36 +117,54 @@ void checkTemp() {
   }
 }
 
-void loop(){
-  if (millis() >= (30*1000) + timer){
-    timer = millis();
-    leseTemp();
-    buttonZaehler = 0;
-  }
-
-  int x = analogRead(A0);
-  if(x >= 1024){
-    quitButtonState = 0;
-    if (millis() - warteButton >= 1000){
-      warteButton = millis();
-      Serial.println("Quitt Button gedrückt");
-      quitButtonState = 1;
-    }
-  }
-
-  
-  if (quitButtonState == 1 && fehlerAnzeige != 0){
-    buttonZaehler++;
-    if (buttonZaehler <= 3){
+void quittieren() {
+  if (quittButtonZaehler >= 1 && fehlerAnzeige != 0) {
     lcd.setCursor(0,1);
     lcd.print("   Quittiert!  ");
     Serial.println("Quittiert: Summer");
-    }
-    else {
+  } 
+  else if (quittButtonZaehler >= 5 && fehlerAnzeige != 0) {
     fehlerAnzeige = 0;
     lcd.setCursor(0,1);
     lcd.print("   Quittiert!  ");
     Serial.println("Quittiert: Fehler");
-    }
   }
+}
+
+
+
+void loop(){
+
+  if (Serial.available() > 0) {
+    // Lies das eingehende Byte:
+    incomingByte = Serial.read();
+
+    // Ausgeben:
+    Serial.print("I received: ");
+    Serial.println(incomingByte, DEC);
+
+    switch (incomingByte) {
+    case 10:
+      if (fehlerAnzeige != 0) {
+        lcd.setCursor(0,1);
+        lcd.print("   Quittiert!  ");
+        Serial.println("Quittiert: Summer");
+      }
+      break;
+    case 11:
+      if (fehlerAnzeige =! 0) {
+        fehlerAnzeige = 0;
+        lcd.setCursor(0,1);
+        lcd.print("   Quittiert!  ");
+        Serial.println("Quittiert: Fehler");
+      }
+      break;
+  }
+  }
+  
+  if (millis() >= (30*1000) + timer){
+    timer = millis();
+    leseTemp();
+  }
+
 }

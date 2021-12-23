@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
+        integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+    <title>Tankwächter</title>
+    <script src="chart.js"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            var lineChartData = {
+                "datasets": [{
+                    "data": [
+
+                        "04.1", "04.1", "04.1", "04.1", "04.1", "04.1", "04.1", "04.1", "04.1",
+                        "04.1", "04.1", "04.1", "04.2", "04.2", "04.2", "04.2", "04.2", "04.2",
+                        "04.2", "04.2", "04.2", "04.2", "04.2", "04.2", "04.2", "04.2", "04.3",
+                        "04.3", "06.8", "09.6", "10.6", "09.6", "08.4", "07.2", "06.1", "04.8",
+                        "03.6", "02.8", "02.5", "02.4", "02.4", "null", "02.3", "02.3", "02.3",
+                        "02.3", "02.3", "02.3", "02.3", "02.3", "02.3", "02.4", "02.3", "02.3",
+                        "02.3", "02.3", "02.4", "02.4", "02.5", "04.7", "06.5", "06.5", "05.6",
+                        "04.7", "03.9", "03.2", "02.9", "02.8", "02.8", "02.8", "02.6", "02.6",
+                    ],
+                    "status": [
+                        "1", "A", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1",
+                        "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1",
+                        "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1",
+                        "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1",
+                        "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1",
+                    ],
+                    "strokeColor": "rgba(120,120,120,1)"
+                }],
+                "labels": [
+                    "2021-03-01", "", "",
+                    "01:00 h", "", "", "02:00 h", "", "", "03:00 h", "", "", "04:00 h", "", "", "05:00 h",
+                    "", "", "06:00 h", "", "", "07:00 h", "", "",
+                    "08:00 h", "", "", "09:00 h", "", "", "10:00 h", "", "", "11:00 h", "", "", "12:00 h",
+                    "", "", "13:00 h", "", "", "14:00 h", "", "",
+                    "15:00 h", "", "", "16:00 h", "", "", "17:00 h", "", "", "18:00 h", "", "", "19:00 h",
+                    "", "", "20:00 h", "", "", "21:00 h", "", "",
+                    "22:00 h", "", "", "23:00 h", "", ""
+                ]
+            };
+
+            Chart.types.Line.extend({
+                name: "LineAlt",
+                initialize: function (data) {
+                    for (i = 0; i < arguments[0].datasets[0].data.length; i++)
+                        if (arguments[0].datasets[0].data[i] > 5)
+                            arguments[0].datasets[0].data[i] = arguments[0].datasets[0].data[i] / 5.0 +
+                            4;
+                    Chart.types.Line.prototype.initialize.apply(this, arguments);
+                },
+            });
+
+            var elem = document.getElementById("canvas");
+            var ctxt = elem.getContext("2d");
+            var chrt = new Chart(ctxt);
+            chrt.LineAlt(lineChartData, {
+                bezierCurve: false,
+                scaleOverride: true,
+                scaleSteps: 16,
+                scaleStepWidth: 1,
+                scaleStartValue: 0,
+                pointDot: false,
+                datasetFill: false,
+                scaleLabel: function (val) {
+                    if (val.value > 5)
+                        return (val.value - 4) * 5 + "°C";
+                    return val.value + "°C";
+                },
+                showTooltips: true,
+                tooltipTemplate: function (v) {
+                    return chartTooltip(v);
+                }
+            });
+        }
+
+        function chartTooltip(v) {
+            var error_desc = new Array("AUS", "Kühlen aktiv", "Spülen aktiv", "Stromausfall", "MIN-Temp. Milch",
+                "MAX-Temp. Milch", "MIN-Temp. Spülen", "Rührwerksstörung", "Nicht Laden", "Max-Zeit bis Spülen",
+                "Aufbewahrungsd.Milch", "Spülmittelkonzentration", "Kühlung AUS", "Kälteaggregat Störung");
+
+            if (v.value == null || v.value == "null")
+                return "Kein Messwert vorhanden";
+            if (v.value > 5)
+                ret = precise_round((v.value - 4) * 5, 1) + " °C";
+            else
+                ret = precise_round(v.value, 1) + " °C";
+            if (v.status == "A")
+                v.status = 10;
+            if (v.status == "B")
+                v.status = 11;
+            if (v.status == "C")
+                v.status = 12;
+            if (v.status == "D")
+                v.status = 13;
+
+            if (v.status >= 3) {
+                ret = ret + ", Fehler: " + error_desc[v.status];
+            }
+            return ret;
+        }
+
+        function sign(num) {
+            // IE does not support method sign here
+            if (typeof Math.sign === 'undefined') {
+                if (num > 0) {
+                    return 1;
+                }
+                if (num < 0) {
+                    return -1;
+                }
+                return 0;
+            }
+            return Math.sign(num);
+        }
+
+        function precise_round(num, decimals) {
+            var t = Math.pow(10, decimals);
+            return (Math.round((num * t) + (decimals > 0 ? 1 : 0) * (sign(num) * (10 / Math.pow(100, decimals)))) / t)
+                .toFixed(decimals);
+        }
+    </script>
+
+    <style type="text/css">
+        #divTempGraphLegend {
+            position: absolute;
+            width: 100%;
+            height: 20px;
+            z-index: 1;
+            left: 0px;
+            top: 90px;
+            min-width: 700px;
+        }
+
+        #canvas {
+            /* border: solid 1px blue; */
+            min-width: 700px;
+            width: 100%;
+            height: 300px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid" style="margin-top:20px;">
+        <div class="row">
+            <div class="col-sm">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="text-center">Übersicht</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <table style="width: 100%;">
+                                                <tr>
+                                                    <th>Akt. Zeit:</th>
+                                                    <td>10:11</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Server Zeit:</th>
+                                                    <td>10:11</td>
+                                                </tr>
+                                            </table>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <table style="width: 100%;">
+                                                <tr>
+                                                    <th>Akt. Temperatur:</th>
+                                                    <td>3,6 C°</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Ereignis:</th>
+                                                    <td>Kühlen</td>
+                                                </tr>
+                                                <tr>
+                                                    <th colspan="3"><button
+                                                            class="btn btn-block btn-success">Aktualisieren</button>
+                                                    </th>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <table style="width: 100%;">
+                                                <tr>
+                                                    <th>Software Version:</th>
+                                                    <td>0.2</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Versorgungsspannug:</th>
+                                                    <td>0,0V</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="text-center">Quittieren</h4>
+                    </div>
+                    <div class="card-body">
+                       <button class="btn btn-block btn-success" disabled>keine Fehler</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="text-center">Übersicht Milchtank</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="divTempGraphLegend"><img
+                                src=" data:image/png;base64,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"
+                                border="0" /></div>
+                        <canvas id="canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"
+        integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/" crossorigin="anonymous">
+    </script>
+</body>
+
+</html>
