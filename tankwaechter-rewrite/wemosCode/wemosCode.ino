@@ -12,11 +12,11 @@
 
 
 const char *ssid     = "Fritz";
-const char *password = "77027122846784678608";
+const char *password = "";
 
-#define BOT_TOKEN "5024417178:AAHM3eqpsyf7J260qaZCjJZCJLOOiG5tsF0"
+#define BOT_TOKEN ""
 
-#define tid "5021644242"
+#define tid ""
 
 X509List cert(TELEGRAM_CERTIFICATE_ROOT);
 WiFiClientSecure secured_client;
